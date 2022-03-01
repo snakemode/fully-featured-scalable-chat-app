@@ -38,8 +38,8 @@ const ChatContainer = ({ currentChannel, onChatExit }) => {
         </h2>
       </header>
       <ul className="messages">
-        <ChatList history={archive} />
-        <ChatList history={history} />
+        <ChatList messages={archive} />
+        <ChatList messages={history} />
         <li className="end-message" ref={endOfChatLog} />
       </ul>
       <ChatInput sendMessage={sendMessage} />
