@@ -10,7 +10,7 @@ describe("Generator", () => {
   });
 
   it("Can validate a token it generated", () => {
-    const result = sut.generate("1");
+    const result = sut.generate("1", "default");
 
     const { success, token } = sut.validate(result);
 
