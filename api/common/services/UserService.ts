@@ -11,6 +11,7 @@ export type LoginMetadata = {
   firstName: string;
   lastName: string;
 };
+
 export type UserCreationRequest = {
   username: string;
   firstName: string;
@@ -20,6 +21,8 @@ export type UserCreationRequest = {
   oauthSub?: string;
   oauthPicture?: string;
 };
+
+type TokenAndMetadata = { token: string; userDetails: LoginMetadata; };
 
 export class UserService {
   private _repo: CosmosDbMetadataRepository;
@@ -94,10 +97,7 @@ export class UserService {
     return user;
   }
 
-  public generateLoginMetadataFor(user: User): {
-    token: string;
-    userDetails: LoginMetadata;
-  } {
+  public generateLoginMetadataFor(user: User): TokenAndMetadata {
     const token = this._jwtValidator.generate(user.id, user.roleName);
     const userDetails = {
       username: user.username,
@@ -110,18 +110,15 @@ export class UserService {
   }
 
   public async getProfileImage(email: string, size: number, oauthPicture?: string) {
-    let userProfileImageUrl: string;
-    const defaultUserProfileImageUrl = await getAzureProfileImgBlobByUrl();
     if (oauthPicture) {
       const googleSizeDelimiter = oauthPicture.indexOf("=s");
-      userProfileImageUrl =
-        googleSizeDelimiter !== -1 ? `${oauthPicture.substring(0, googleSizeDelimiter)}=s${size}` : oauthPicture;
-    } else {
-      userProfileImageUrl = `https://www.gravatar.com/avatar/${this.getEmailHash(email)}?d=${encodeURIComponent(
-        defaultUserProfileImageUrl
-      )}&s=${size}`;
+      return googleSizeDelimiter !== -1 ? `${oauthPicture.substring(0, googleSizeDelimiter)}=s${size}` : oauthPicture;
     }
-    return userProfileImageUrl;
+
+    const defaultUserProfileImageUrl = await getAzureProfileImgBlobByUrl();
+    const emailHash = this.getEmailHash(email);
+    const encodedUri = encodeURIComponent(defaultUserProfileImageUrl);
+    return `https://www.gravatar.com/avatar/${emailHash}?d=${encodedUri}&s=${size}`;
   }
 
   private getEmailHash(email: string): string {
