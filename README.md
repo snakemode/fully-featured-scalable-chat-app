@@ -27,12 +27,14 @@ COSMOS_ENDPOINT=https://yourcosomsdb.documents.azure.com
 COSMOS_KEY=ASK FOR THIS OR MAKE YOUR OWN
 COSMOS_DATABASE_ID=metadata
 AZURE_STORAGE_CONNECTION_STRING=your string here
-AZURE_STORAGE_CONTAINER_NAME=container name here
 
 # Auth0
 AUTH0_DOMAIN=yourdomain.auth0.com
 AUTH0_CLIENTID=yourclientid
 AUTH0_REDIRECT_URI=http://localhost:8080/auth0-landing
+
+# Web - either local or your deployed instance.
+WEB_ROOT=http://localhost:8080
 ```
 
 4. Setup the node modules and run the app

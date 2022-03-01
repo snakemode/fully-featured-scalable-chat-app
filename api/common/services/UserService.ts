@@ -1,10 +1,9 @@
 import { CosmosDbMetadataRepository } from "../dataaccess/CosmosDbMetadataRepository";
 import { JwtGenerator } from "../JwtGenerator";
 import { User } from "../metadata/User";
-import { getAzureProfileImgBlobByUrl } from "../dataaccess/AzureBlobStorageClient";
 import { Role } from "../metadata/Role";
 import { RoleService } from "./RoleService";
-import * as md5 from "md5";
+import { UserProfileSelection } from "./features/UserProfileSelection";
 
 export type LoginMetadata = {
   username: string;
@@ -84,14 +83,17 @@ export class UserService {
   }
 
   public async createUser(request: UserCreationRequest): Promise<User> {
-    const userProfileImageSmallUrl = await this.getProfileImage(request.email, 80, request.oauthPicture);
-    const userProfileImageLargeUrl = await this.getProfileImage(request.email, 600, request.oauthPicture);
+    const profilePicker = new UserProfileSelection();
+
+    const { small, large } = profilePicker.assignProfileImages(request.email, request.oauthPicture);
+
     const requestWithProfileImg = {
       ...request,
-      profileImgSmallUrl: userProfileImageSmallUrl,
-      profileImgLargeUrl: userProfileImageLargeUrl,
+      profileImgSmallUrl: small,
+      profileImgLargeUrl: large,
       roleName: "normal"
     };
+
     const user = User.fromJSON(requestWithProfileImg);
     await this._repo.saveOrUpdate<User>(user);
     return user;
@@ -109,19 +111,5 @@ export class UserService {
     return { token, userDetails };
   }
 
-  public async getProfileImage(email: string, size: number, oauthPicture?: string) {
-    if (oauthPicture) {
-      const googleSizeDelimiter = oauthPicture.indexOf("=s");
-      return googleSizeDelimiter !== -1 ? `${oauthPicture.substring(0, googleSizeDelimiter)}=s${size}` : oauthPicture;
-    }
-
-    const defaultUserProfileImageUrl = await getAzureProfileImgBlobByUrl();
-    const emailHash = this.getEmailHash(email);
-    const encodedUri = encodeURIComponent(defaultUserProfileImageUrl);
-    return `https://www.gravatar.com/avatar/${emailHash}?d=${encodedUri}&s=${size}`;
-  }
-
-  private getEmailHash(email: string): string {
-    return md5(email.toLowerCase().trim());
-  }
 }
+
