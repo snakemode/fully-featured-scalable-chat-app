@@ -101,6 +101,11 @@ export class BffApiClient {
     const result = await this.get(`/api/archive/${channelName}?offset=${offset}`);
     return await result.json();
   }
+
+  async getChannelMetadata(channelName) {
+    const result = await this.get(`/api/channels/${channelName}`);
+    return await result.json();
+  }
 }
 
 export const unauthorizedBffApiClient = new BffApiClient();

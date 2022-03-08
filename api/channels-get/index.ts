@@ -5,11 +5,8 @@ import { ChannelService } from "../common/services/ChannelService";
 
 export default async function (context: Context, req: HttpRequest): Promise<void> {
   await authorized(context, req, async () => {
-
     const service = new ChannelService();
     const channel = await service.loadMetadata(req.params.channelName);
-    const response = { channel };
-
-    context.res = { status: 200, body: JSON.stringify(response) };
+    context.res = { status: 200, body: JSON.stringify(channel) };
   });
 }
