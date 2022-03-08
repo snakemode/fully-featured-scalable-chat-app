@@ -27,7 +27,7 @@ const ChannelList = ({ channels, onChannelSelected }) => {
     <>
       <section className="channellist">
         <Header />
-        <h2>Channels</h2>
+        <h2>All Channels</h2>
         <ul>{channelListItems}</ul>
       </section>
     </>
