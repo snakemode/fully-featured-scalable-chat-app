@@ -15,7 +15,8 @@ export class CosmosDbMetadataRepository implements IMetadataRepository {
   public async getById<TEntityType extends Entity>(typeName: string, id: string): Promise<TEntityType> {
     const container = await this.getContainer(typeName);
     const allMatchingItems = await container.items.query(`SELECT * FROM c WHERE c.id = '${id}'`).fetchAll();
-    return allMatchingItems[0];
+    const resources = allMatchingItems.resources;
+    return resources[0];
   }
 
   public async getByProperty<TEntityType extends Entity>(
@@ -39,7 +40,7 @@ export class CosmosDbMetadataRepository implements IMetadataRepository {
 
   public async delete<TEntityType extends Entity>(entity: TEntityType): Promise<boolean> {
     const container = await this.getContainer(entity.type);
-    const { resource: result } = await container.item(entity.type, entity.id).delete();
+    const { resource: result } = await container.item(entity.id).delete();
 
     if (result.statusCode !== 201) {
       throw new Error(`Error deleting entity of type ${entity.type} and id ${entity.id}`);
@@ -52,6 +53,13 @@ export class CosmosDbMetadataRepository implements IMetadataRepository {
     const container = await this.getContainer(typeName);
     const countResult = await container.items.query(`SELECT count(1) FROM c WHERE c.id = '${id}'`).fetchAll();
     return countResult[0] > 0;
+  }
+
+  public async listAll(typeName: string): Promise<Entity[]> {
+    const container = await this.getContainer(typeName);
+    const results = await container.items.query("SELECT c.id, c.type FROM c").fetchAll();
+    const resources = results.resources;
+    return resources as Entity[];
   }
 
   public async getAll<TEntityType extends Entity>(typeName: string): Promise<TEntityType[]> {
